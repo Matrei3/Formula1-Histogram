@@ -21,7 +21,8 @@ namespace Formula1_Histogram
         Dictionary<string, System.Drawing.Bitmap> _flagMapDrivers = new Dictionary<string, System.Drawing.Bitmap>();
         Dictionary<string, System.Drawing.Bitmap> _flagMapConstructors = new Dictionary<string, System.Drawing.Bitmap>();
         Dictionary<string, int> _roundToNumber = new Dictionary<string, int>();
-        HttpClient _client = new HttpClient();
+        List<Task<string>> _httpRequestList = new List<Task<string>>();
+        Dictionary<int, string> _urlForEachThread = new Dictionary<int, string>();
         SoundPlayer _soundPlayer = new SoundPlayer();
         int _constructorNumber = 20;
         int _year;
@@ -30,7 +31,7 @@ namespace Formula1_Histogram
             InitializeComponent();
         }
         /// <summary>
-        /// If the button ENTER is pressed send HTTP request without the need of pressing the button.
+        /// If the button ENTER is pressed send request without the need of pressing the button.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -142,26 +143,27 @@ namespace Formula1_Histogram
                 string driverAPI = $"https://ergast.com/api/f1/{yearLabel.Text}/driverStandings";
                 string constructorAPI = $"https://ergast.com/api/f1/{yearLabel.Text}/constructorStandings";
                 string roundAPI = $"https://ergast.com/api/f1/{yearLabel.Text}";
+                List<string> urlList = new List<string>();
+                _httpRequestList.Clear();
+                urlList.Add(driverAPI); 
+                urlList.Add(constructorAPI); 
+                urlList.Add(roundAPI);
+                foreach(string  url in urlList)
+                {   //Making things concurrently using threads to fasten the process
+                    _httpRequestList.Add(MakeHttpRequestAsync(url));
+                }
 
-                waitingLabel.Visible = true;//Show a label to inform the user that the data is being retrieved
-                _soundPlayer.Stream = Properties.Resources.f1notification_wav;
-                _soundPlayer.Play();//Play a sound once the request button has been pressed
+                var results = await Task.WhenAll(_httpRequestList);//Wait for all threads to end
+                List<string> resultList = new List<string>();
+                foreach(var result in results)
+                {
+                    resultList.Add(result);
+                }
 
-                //The requests are being made and responded
-                HttpResponseMessage responseDriver = await _client.GetAsync(driverAPI);
-                HttpResponseMessage responseConstructor = await _client.GetAsync(constructorAPI);
-                HttpResponseMessage responseRound = await _client.GetAsync(roundAPI);
-                waitingLabel.Visible = false;//Once the data is retrieved remove the waiting label
-
-                //The XML files retrieved by the request converted to string
-                string messageDriver = await responseDriver.Content.ReadAsStringAsync();
-                string messageConstructor = await responseConstructor.Content.ReadAsStringAsync();
-                string messageRound = await responseRound.Content.ReadAsStringAsync();
-                
                 //Parsing the header of the XML file
-                XDocument driverDocument = XDocument.Parse(messageDriver);
-                XDocument constructorDocument = XDocument.Parse(messageConstructor);
-                XDocument roundDocument = XDocument.Parse(messageRound);
+                XDocument driverDocument = XDocument.Parse(resultList[0]);
+                XDocument constructorDocument = XDocument.Parse(resultList[1]);
+                XDocument roundDocument = XDocument.Parse(resultList[2]);
 
                 //The actual data that will be processed
                 var drivers = driverDocument.Descendants(_ns + "Driver");
@@ -324,6 +326,16 @@ namespace Formula1_Histogram
                 }
             }
         }
+
+        static async Task<string> MakeHttpRequestAsync(string url)
+        {   //Simplest way of getting the XML data
+            HttpClient httpClient = new HttpClient();
+            HttpResponseMessage response = await httpClient.GetAsync(url);
+            string content = await response.Content.ReadAsStringAsync();
+            return content;
+           
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             configureStandings();
@@ -354,29 +366,48 @@ namespace Formula1_Histogram
         /// <param name="e"></param>
         private async void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {   //Only request data if the selected round is valid
+            if(roundBox.Text == "Select Round")
+            {
+                raceNameLabel.Visible = false;
+                afterRaceClasification.Visible = false;
+                seasonConstructorStatisticsLabel.Visible = true;
+                seasonDriverStatisticsLabel.Visible = true;
+                dominationConstructorChart.Visible = true;
+                dominationPilotChart.Visible = true;
+            }
             if (roundBox.Text != "Select Round")
             {
                 
                 string driverAfterRoundAPI = $"http://ergast.com/api/f1/{_year}/{_roundToNumber[roundBox.Text]}/driverStandings";
                 string constructorAfterRoundAPI = $"http://ergast.com/api/f1/{_year}/{_roundToNumber[roundBox.Text]}/constructorStandings";
-
-                waitingLabel.Visible = true;
-                HttpResponseMessage responseDriver = await _client.GetAsync(driverAfterRoundAPI);
-                HttpResponseMessage responseConstructor = await _client.GetAsync(constructorAfterRoundAPI);
-                waitingLabel.Visible = false;
+                string raceResultsAPI = $"http://ergast.com/api/f1/{_year}/{_roundToNumber[roundBox.Text]}/results";
+                List<string> urlList = new List<string>();
+                _httpRequestList.Clear();
+                urlList.Add(driverAfterRoundAPI);
+                urlList.Add(constructorAfterRoundAPI);
+                urlList.Add(raceResultsAPI);
+                foreach (string url in urlList)
+                {
+                    _httpRequestList.Add(MakeHttpRequestAsync(url));
+                }
+                var results = await Task.WhenAll(_httpRequestList);
+                List<string> resultList = new List<string>();
+                foreach (var result in results)
+                {
+                    resultList.Add(result);
+                }
 
                 List<Tuple<string, string>> driverNameList = new List<Tuple<string, string>>();
                 List<Tuple<string, string>> constructorNameList = new List<Tuple<string, string>>();
                 List<string> constructorForDriver = new List<string>();
 
-                string messageDrivers = await responseDriver.Content.ReadAsStringAsync();
-                string messageConstructors = await responseConstructor.Content.ReadAsStringAsync();
-
-                XDocument afterSpecificRoundDriverDocument = XDocument.Parse(messageDrivers);
-                XDocument afterSpecificRoundConstructorDocument = XDocument.Parse(messageConstructors);
+                XDocument afterSpecificRoundDriverDocument = XDocument.Parse(resultList[0]);
+                XDocument afterSpecificRoundConstructorDocument = XDocument.Parse(resultList[1]);
+                XDocument specificRaceResultsDocument = XDocument.Parse(resultList[2]);
 
                 var drivers = afterSpecificRoundDriverDocument.Descendants(_ns + "DriverStanding");
                 var constructors = afterSpecificRoundConstructorDocument.Descendants(_ns + "ConstructorStanding");
+                var roundResults = specificRaceResultsDocument.Descendants(_ns + "Result");
 
                 foreach (var driver in drivers)
                 {
@@ -398,7 +429,41 @@ namespace Formula1_Histogram
 
                     constructorNameList.Add(new Tuple<string, string>(constructorName, constructorPoint));
                 }
+                int numberFinished = 1;
+                string fastestLap;
+                string numberOfLaps = "100";
+                List<string> raceResultsList = new List<string>();
+                foreach(var driver in roundResults)
+                {    
+                    string givenCode = driver.Element(_ns + "Driver").Element(_ns + "FamilyName")?.Value;
+                    string constructorName = driver.Element(_ns + "Constructor").Element(_ns + "Name")?.Value;
+                    string driverLabel = driverLabel = $"{numberFinished}. {givenCode} ({constructorName.Substring(0,3).ToUpper()}) ";
+                    string numberOfPoints = driver.Attribute("points")?.Value;
+                    try
+                    {
+                        if(driver.Element(_ns + "FastestLap").Attribute("rank")?.Value == "1")
+                        {
+                            fastestLap = driver.Element(_ns + "FastestLap").Element(_ns + "Time")?.Value;
+                            driverLabel += fastestLap;
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+                    driverLabel += $" {numberOfPoints}p";
+                    string finishStatus = driver.Element(_ns + "Status")?.Value;
+                    if (finishStatus != "Finished" && finishStatus.Substring(0,1)!= "+")
+                    {
+                        driverLabel += " DNF";
+                    }
+                    raceResultsList.Add(driverLabel);
+                    numberFinished++;
+                }
                 driversTable.Controls.Clear();
+                afterRaceClasification.BringToFront();
+                afterRaceClasification.Controls.Clear();
+                afterRaceClasification.RowCount = raceResultsList.Count;
                 driversTable.RowCount = driverNameList.Count;
                 int number = 1;
                 int pointIndex = 0;
@@ -452,6 +517,30 @@ namespace Formula1_Histogram
                     constructorTable.Controls.Add(nationLabel);
                     number++;
                 }
+                number = 1;
+                foreach (string driver in raceResultsList)
+                {
+                    Label nameLabel = new Label();
+                    nameLabel.AutoSize = true;
+                    nameLabel.Text = driver;
+                    if (number == 1)
+                        nameLabel.ForeColor = Color.Gold;
+                    if (number == 2)
+                        nameLabel.ForeColor = Color.Silver;
+                    if (number == 3)
+                        nameLabel.ForeColor = Color.Brown;
+                    if (driver.Contains(":"))
+                        nameLabel.ForeColor = Color.Purple;
+                    afterRaceClasification.Controls.Add(nameLabel);
+                    number++;
+                }
+                raceNameLabel.Text = roundBox.Text;
+                raceNameLabel.Visible = true;
+                afterRaceClasification.Visible = true;
+                seasonConstructorStatisticsLabel.Visible = false;
+                seasonDriverStatisticsLabel.Visible = false;
+                dominationConstructorChart.Visible = false;
+                dominationPilotChart.Visible = false;
             }
         }
 
