@@ -49,6 +49,9 @@
             this.seasonConstructorStatisticsLabel = new System.Windows.Forms.Label();
             this.seasonDriverStatisticsLabel = new System.Windows.Forms.Label();
             this.dominationPilotChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.afterRaceClasification = new System.Windows.Forms.TableLayoutPanel();
+            this.roundLabel = new System.Windows.Forms.Label();
+            this.raceNameLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dominationConstructorChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dominationPilotChart)).BeginInit();
             this.SuspendLayout();
@@ -302,17 +305,78 @@
             this.dominationPilotChart.Text = "chart1";
             this.dominationPilotChart.Visible = false;
             // 
+            // afterRaceClasification
+            // 
+            this.afterRaceClasification.ColumnCount = 1;
+            this.afterRaceClasification.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.afterRaceClasification.Font = new System.Drawing.Font("Courier New", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.afterRaceClasification.Location = new System.Drawing.Point(740, 147);
+            this.afterRaceClasification.Name = "afterRaceClasification";
+            this.afterRaceClasification.RowCount = 24;
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.afterRaceClasification.Size = new System.Drawing.Size(377, 484);
+            this.afterRaceClasification.TabIndex = 15;
+            this.afterRaceClasification.Visible = false;
+            // 
+            // roundLabel
+            // 
+            this.roundLabel.AutoSize = true;
+            this.roundLabel.Font = new System.Drawing.Font("Rockwell", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.roundLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.roundLabel.Location = new System.Drawing.Point(725, 115);
+            this.roundLabel.Name = "roundLabel";
+            this.roundLabel.Size = new System.Drawing.Size(0, 29);
+            this.roundLabel.TabIndex = 16;
+            this.roundLabel.Visible = false;
+            // 
+            // raceNameLabel
+            // 
+            this.raceNameLabel.AutoSize = true;
+            this.raceNameLabel.Font = new System.Drawing.Font("Rockwell", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.raceNameLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.raceNameLabel.Location = new System.Drawing.Point(731, 115);
+            this.raceNameLabel.Name = "raceNameLabel";
+            this.raceNameLabel.Size = new System.Drawing.Size(215, 29);
+            this.raceNameLabel.TabIndex = 17;
+            this.raceNameLabel.Text = "Constructor wins";
+            this.raceNameLabel.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1264, 761);
-            this.Controls.Add(this.roundBox);
-            this.Controls.Add(this.dominationPilotChart);
-            this.Controls.Add(this.specificRoundLabel);
+            this.Controls.Add(this.raceNameLabel);
+            this.Controls.Add(this.roundLabel);
             this.Controls.Add(this.seasonDriverStatisticsLabel);
-            this.Controls.Add(this.seasonConstructorStatisticsLabel);
             this.Controls.Add(this.dominationConstructorChart);
+            this.Controls.Add(this.dominationPilotChart);
+            this.Controls.Add(this.roundBox);
+            this.Controls.Add(this.specificRoundLabel);
+            this.Controls.Add(this.seasonConstructorStatisticsLabel);
             this.Controls.Add(this.waitingLabel);
             this.Controls.Add(this.constructorTable);
             this.Controls.Add(this.constructorStandingLabel);
@@ -321,6 +385,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.yearLabel);
             this.Controls.Add(this.requestButton);
+            this.Controls.Add(this.afterRaceClasification);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "F1 Histogram";
@@ -347,6 +412,9 @@
         private System.Windows.Forms.Label seasonConstructorStatisticsLabel;
         private System.Windows.Forms.Label seasonDriverStatisticsLabel;
         private System.Windows.Forms.DataVisualization.Charting.Chart dominationPilotChart;
+        private System.Windows.Forms.TableLayoutPanel afterRaceClasification;
+        private System.Windows.Forms.Label roundLabel;
+        private System.Windows.Forms.Label raceNameLabel;
     }
 }
 
